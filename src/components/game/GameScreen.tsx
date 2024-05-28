@@ -16,7 +16,7 @@ class GameScreen extends React.Component<GameProps, GameState> {
 
     constructor(props: GameProps) {
         super(props);
-	      this.game = new Game();
+	      this.game = new Game(this);
         this.state = { mode: 'game' };
     }
 
@@ -24,11 +24,13 @@ class GameScreen extends React.Component<GameProps, GameState> {
       this.setState({ mode: state });
     }
 
-    componentDidMount(): void {
+    async componentDidMount(): Promise<void> {
       // Initialize PIXI.js intance and some staff
-      this.game.initPixi();
+      await this.game.initPixi();
       // Initialize game networking
       this.game.initNetwork();
+      // Initialize client-side systems
+      this.game.initSystems();
       // Start game
       this.game.start();
     }

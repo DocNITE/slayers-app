@@ -3,16 +3,23 @@ import { Socket, io } from 'socket.io-client';
 import Logger from '../utils/Logger';
 import Entity from './Entity';
 import EventEmitter from 'events';
+import NetSession from '../utils/NetSession';
+import GameScreen from '../components/game/GameScreen';
+import World from './World';
+// Systems
+import * as PlayerSystem from './systems/Player'
+import * as WorldSystem from './systems/World'
+import * as SpriteSystem from './systems/Sprite'
 
 /* Main game context. Should be created once. */
 class Game {
     // PIXI.js application instance. Contains all render logic
     public pixiApp: Application;
     // Main game world data. Using pixi's container for rendering
-    public world: Container;
+    public world: World;
 
     // Local client socket for accept/sending net messages
-    public socket?: Socket;
+    public session: NetSession | null;
 
     // Texture atlas of game sprite data
     public textureAtlas?: Texture;
@@ -22,24 +29,20 @@ class Game {
     public emitter: EventEmitter;
 
     private logger: Logger;
+    private gameScreen: GameScreen;
 
-    constructor() {
+    constructor(gameScreen: GameScreen) {
       this.pixiApp = new Application();
-      this.world = new Container();
+      this.world = new World(this);
+
+      this.session = null;
 
       this.emitter = new EventEmitter();
 
       this.logger = new Logger('Game');
+      this.gameScreen = gameScreen;
 
       this.pixiApp.stage.addChild(this.world);
-    }
-
-    public createEntity(): Entity {
-      let entity = new Entity();
-      
-      this.world.addChild(entity);
-
-      return entity;
     }
 
     /**
@@ -88,7 +91,7 @@ class Game {
      * Initialize networking
      */
     public initNetwork() {
-      if (this.socket != null)
+      if (this.session != null)
         return;
 
       // TODO: Should be accept server's config with connection info
@@ -97,29 +100,41 @@ class Game {
       const protocol = 'ws'; // 'http' or 'ws'
 
       // Try connect to server with connection type
-      this.socket = io(`${protocol}://${address}:${port}`);
+      let socket = io(`${protocol}://${address}:${port}`);
+
+      // Create local network session
+      this.session = new NetSession(socket);
 
       // Emit event, if connection is succesful
-      this.socket.on('connect', () => {
+      this.session.socket.on('connect', () => {
         this.logger.info('Connection is succesful');
-        this.emitter.emit('onConnect', this, this.socket)
+        this.emitter.emit('onConnect', this, this.session)
       });
 
       // Emit event, if connection was disconnect
-      this.socket.on('disconnect', () => {
+      this.session.socket.on('disconnect', () => {
         this.logger.info('Disconnect from the server');
       });
 
       // Or... Emit if socket was fucked up 
-      this.socket.on('connect_error', (err: { message: any; }) => {
+      this.session.socket.on('connect_error', (err: { message: any; }) => {
         // TODO: Need make better error handling and reconnect logic
         // ...       
 
         // The reason of the error, for example "xhr poll error"
         this.logger.error(err.message);
         // Disconnect socket. Fuck it...
-        this.socket?.disconnect()
+        this.session?.socket.disconnect()
       });
+    }
+
+    /**
+     * Initialize systems and other staff
+     */
+    public initSystems() {
+      PlayerSystem.create(this);
+      WorldSystem.create(this);
+      SpriteSystem.create(this);
     }
 
     /**
@@ -129,8 +144,13 @@ class Game {
       // Emit initialization for systems
       this.emitter.emit('onInit', this);
 
-        // Emit... Maybe start? Why not /shrug
+      // Emit... Maybe start? Why not /shrug
       this.emitter.emit('onStart', this);
+
+      // Emit keyboard buttons
+      document.addEventListener('keydown', (ev) => {
+        this.emitter.emit('onKeyDown', this, ev);
+      })
 
       this.world.onRender = () => {
         this.emitter.emit('onRender', this);
@@ -148,11 +168,9 @@ class Game {
      * Should be called outside. Deinitialize game connection for server understanding 
      */
     public destroyNetwork() {
-      this.socket?.disconnect();
+      this.session?.socket.disconnect();
+      this.session = null;
     }
-
-    private render() {
-    } 
 }
 
 export default Game;
