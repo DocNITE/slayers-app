@@ -46,6 +46,12 @@ class GameScreen extends React.Component<GameProps, GameState> {
       return <div>
 	      <canvas className="Canvas" id="game-canvas" >
         </canvas>
+      </div>
+    }
+}
+
+/**
+ * 
         <div className="ToMenu">
         <button className="ToMen" onClick={() => {
           // Deinitialize game context
@@ -64,8 +70,6 @@ class GameScreen extends React.Component<GameProps, GameState> {
           <h1 className="ToMenu" style={{color: 'red'}}>Bro</h1>
         )}
         </div>
-      </div>
-    }
-}
+ */
 
 export default GameScreen;

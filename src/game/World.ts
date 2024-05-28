@@ -51,6 +51,7 @@ class World extends Container {
       } 
 
       // Update entity position
+      // TODO: Should be looks some better
       entity.x = TILE_SIZE * entity.properties.physics.position.x;
       entity.y = TILE_SIZE * entity.properties.physics.position.y;
 
@@ -61,6 +62,51 @@ class World extends Container {
       this.game.emitter.emit('onEntityCreated', this.game, this, entity);
 
       return entity;
+    }
+
+    /**
+     * Destroy local entity
+     * @param entity entity
+     */
+    public destroyEntity(entity: Entity) {
+        this.entities.removeChild(entity);
+        this.game.emitter.emit('onEntityDestroyed', this.game, this, entity);
+    }
+
+    /**
+     * Destory local entity by his id
+     * @param id entity what should be deleted
+     */
+    public destroyEntityById(id: number) {
+        let entity = this.findEntityById(id);
+        if (entity != null)
+            this.destroyEntity(entity);
+    }
+
+    /**
+     * Try to get entity but with his id
+     * @param id entity id
+     * @returns entity or null
+     */
+    public findEntityById(id: number): Entity | null {
+        let result = null;
+        this.entities.children.forEach(child => {
+            const entity = child as Entity;
+            if (entity.id == id)
+                result = entity;
+        })
+        return result;
+    }
+
+    public moveEntity(entity: Entity, x: number, y: number) {
+      // TODO: Should be looks some better
+      entity.properties.physics.position.x = x;
+      entity.properties.physics.position.y = y;
+
+      entity.x = TILE_SIZE * entity.properties.physics.position.x;
+      entity.y = TILE_SIZE * entity.properties.physics.position.y;
+
+      this.game.emitter.emit('onEntityMoved', this.game, this, entity);
     }
 
     /**
@@ -79,6 +125,7 @@ class World extends Container {
       } 
 
       // Update tile position
+      // TODO: Should be looks some better
       tile.x = TILE_SIZE * tile.properties.x;
       tile.y = TILE_SIZE * tile.properties.y;
 
@@ -89,6 +136,40 @@ class World extends Container {
       this.game.emitter.emit('onTileCreated', this.game, this, tile);
 
       return tile;
+    }
+
+    /**
+     * Destroy local tile
+     * @param tile tile
+     */
+    public destroyTile(tile: Tile) {
+        this.tiles.removeChild(tile);
+        this.game.emitter.emit('onTileDestroyed', this.game, this, tile);
+    }
+
+    /**
+     * Destory local tile by his id
+     * @param id tile what should be deleted
+     */
+    public destroyTileById(id: number) {
+        let tile = this.findTileById(id);
+        if (tile != null)
+            this.destroyTile(tile);
+    }
+
+    /**
+     * Try to get tile but with his id
+     * @param id tile id
+     * @returns tile or null
+     */
+    public findTileById(id: number): Tile | null {
+        let result = null;
+        this.tiles.children.forEach(child => {
+            const tile = child as Tile;
+            if (tile.id == id)
+                result = tile;
+        })
+        return result;
     }
 }
 

@@ -32,13 +32,17 @@ function onSync(game: Game, data: any) {
         // Create tiles...
         if ('tiles' in data) {
             data.tiles.forEach((tile: any) => {
-                game.world.createTile(tile);
+                let localTile = game.world.findEntityById(tile.id);
+                if (localTile == null)
+                    game.world.createTile(tile);
             });
         }
         // Create entities...
         if ('entities' in data) {
             data.entities.forEach((entity: any) => {
-                game.world.createEntity(entity);
+                let localEnt = game.world.findEntityById(entity.id)
+                if (localEnt == null)
+                    game.world.createEntity(entity);
             });
         }
     }

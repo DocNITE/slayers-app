@@ -24,8 +24,8 @@ class App extends React.Component<AppProps, AppState> {
     if (this.state.mode == 'menu') {
     return <div className="App">
       <header className="App-header">
-          bro
-          <button onClick={() => {this.changeMode('game')}}>ToGame</button>
+          Multiplayer Game
+          <button onClick={() => {this.changeMode('game')}}>Join</button>
       </header>
     </div>
     } else if (this.state.mode == 'game') {
