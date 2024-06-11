@@ -4,6 +4,9 @@ import './index.css';
 import App from './components/App';
 import reportWebVitals from './utils/reportWebVitals';
 
+// Change title
+document.title = "Treasure Hunt (Pre-Pre-Alpha)"
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );

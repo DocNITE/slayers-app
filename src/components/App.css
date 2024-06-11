@@ -2,6 +2,15 @@
   text-align: center;
 }
 
+.Title {
+  margin: 64px;
+  font-size: 96px;
+  background: linear-gradient(orange, yellow);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;

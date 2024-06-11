@@ -1,0 +1,20 @@
+.Form {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.Label {
+    align-items: start;
+}
+
+.Button-Group {
+    display: flex;
+    margin: 8px;
+}
+
+.Hint {
+    font-size: 16px;
+    margin: 16px;
+}

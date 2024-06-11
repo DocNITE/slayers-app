@@ -45,10 +45,13 @@ function onConnect(game: Game, session: NetSession) {
         session.socket.on('Player_attachEntity', (id: number) => {
             session.attachedEntity = id;
             logger.info('Attached on entity ' + session.attachedEntity);
+
+            session.socket.emit('Player_setName', game.nickname)
         });
-        session.socket.on('Player_move', (entId: number, x: number, y: number) => {
+        session.socket.on('Player_move', (entId: number, x: number, y: number, fliped: boolean) => {
             let entity = game.world.findEntityById(entId);
             if (entity) {
+                entity.properties.sprite.fliped = fliped;
                 game.world.moveEntity(entity, x, y);
             }
         });
@@ -66,6 +69,37 @@ function onConnect(game: Game, session: NetSession) {
             if (entity)
                 entity.properties.name = name;
         })
+
+        session.socket.on('Coin_set', (id: number, amount: number, addedAmount: number) => {
+            try {
+                
+            let entity = game.world.findEntityById(id);
+            if (entity != null)
+                entity.properties.coins.amount = amount;
+
+            logger.info('Setted coins for entity ' + id)
+
+            if (session.attachedEntity != null && session.attachedEntity == id) {
+                if (!amount)
+                    game.gameScreen.changeCoinsText(`Coins: 0`);
+                else 
+                    game.gameScreen.changeCoinsText(`Coins: ${entity?.properties.coins.amount}`)
+            }
+            } catch (error) {
+                game.gameScreen.changeCoinsText(`Coins: 0`)   
+            }
+        })
+
+        session.socket.on('Round_winner', (id: number, amount: number) => { 
+            let entity = game.world.findEntityById(id);
+            if (entity != null)
+                game.gameScreen.changeWinnerText(`${entity.properties.name} winner! He gain ${amount} coins!`);
+        })
+
+        session.socket.on('Round_start', () => {
+            game.gameScreen.changeWinnerText('');
+        })
+
     }
 }
 

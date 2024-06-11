@@ -4,8 +4,21 @@
     right: 0px;
 }
 
-.ToMenu {
+.Coins {
+    font-family: monospace;
+    font-size: 32px;
+    color: yellow;
     position: absolute;
-    left: 0px;
-    right: 0px;
+    left: 16px;
+    right: 16px;
+}
+
+.Winner {
+    margin: 64px;
+    font-family: monospace;
+    font-size: 64px;
+    color: green;
+    position: absolute;
+    left: 16px;
+    right: 16px;
 }

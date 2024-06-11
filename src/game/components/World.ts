@@ -1,11 +1,11 @@
 import { Container, Sprite } from "pixi.js";
 import Entity from "./Entity";
 import Tile from "./Tile";
-import Logger from "../utils/Logger";
-import Game from "./Game";
+import Logger from "../../utils/Logger";
+import Game from "../Game";
 
 // TODO: Should be moved into World settings
-const TILE_SIZE = 16;
+export const TILE_SIZE = 24;
 
 class World extends Container {
     private game: Game;
@@ -35,6 +35,25 @@ class World extends Container {
         this.logger = new Logger('World');
     }
 
+    public moveEntity(entity: Entity, x: number, y: number) {
+        // TODO: Should be looks some better
+        entity.properties.physics.position.x = x;
+        entity.properties.physics.position.y = y;
+ 
+        if (entity.properties.sprite.fliped) {
+            entity.scale.x = -1;
+            entity.x = TILE_SIZE * (entity.properties.physics.position.x + 1);
+            entity.y = TILE_SIZE * (entity.properties.physics.position.y);
+        } else {
+            entity.scale.x = 1;
+            entity.x = TILE_SIZE * entity.properties.physics.position.x;
+            entity.y = TILE_SIZE * entity.properties.physics.position.y;
+        }
+  
+        this.game.emitter.emit('onEntityMoved', this.game, this, entity);
+      }
+  
+
 
     /**
      * Create local entity
@@ -48,12 +67,7 @@ class World extends Container {
             entity.id = data.id;
         if ('properties' in data)
             entity.properties = data.properties;
-      } 
-
-      // Update entity position
-      // TODO: Should be looks some better
-      entity.x = TILE_SIZE * entity.properties.physics.position.x;
-      entity.y = TILE_SIZE * entity.properties.physics.position.y;
+      }  
 
       // Add entity to the world
       this.entities.addChild(entity);
@@ -96,18 +110,7 @@ class World extends Container {
                 result = entity;
         })
         return result;
-    }
-
-    public moveEntity(entity: Entity, x: number, y: number) {
-      // TODO: Should be looks some better
-      entity.properties.physics.position.x = x;
-      entity.properties.physics.position.y = y;
-
-      entity.x = TILE_SIZE * entity.properties.physics.position.x;
-      entity.y = TILE_SIZE * entity.properties.physics.position.y;
-
-      this.game.emitter.emit('onEntityMoved', this.game, this, entity);
-    }
+    } 
 
     /**
      * Create local tile
@@ -122,12 +125,7 @@ class World extends Container {
         if ('properties' in data) {
             tile.properties = data.properties;
         }
-      } 
-
-      // Update tile position
-      // TODO: Should be looks some better
-      tile.x = TILE_SIZE * tile.properties.x;
-      tile.y = TILE_SIZE * tile.properties.y;
+      }  
 
       // Add tile to the world
       this.tiles.addChild(tile);

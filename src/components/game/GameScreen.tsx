@@ -4,11 +4,14 @@ import Game from '../../game/Game';
 import App from "../App";
 
 interface GameProps {
-  app: App
+  app: App;
+  nickname: string;
 }
 
 interface GameState {
-  mode: 'menu' | 'game'
+  mode: 'menu' | 'game';
+  coinsText: string;
+  winnerText: string;
 }
 
 class GameScreen extends React.Component<GameProps, GameState> {
@@ -16,19 +19,27 @@ class GameScreen extends React.Component<GameProps, GameState> {
 
     constructor(props: GameProps) {
         super(props);
-	      this.game = new Game(this);
-        this.state = { mode: 'game' };
+	      this.game = new Game(this, "lol", 11100);
+        this.state = { mode: 'game', coinsText: 'Coins: 0' , winnerText: ''};
     }
 
     changeMode(state: 'menu' | 'game') {
       this.setState({ mode: state });
+    }
+  
+    changeCoinsText(state: string) {
+      this.setState({coinsText: state})
+    }
+
+    changeWinnerText(state: string) {
+      this.setState({winnerText: state})
     }
 
     async componentDidMount(): Promise<void> {
       // Initialize PIXI.js intance and some staff
       await this.game.initPixi();
       // Initialize game networking
-      this.game.initNetwork();
+      this.game.initNetwork(this.props.nickname);
       // Initialize client-side systems
       this.game.initSystems();
       // Start game
@@ -46,6 +57,8 @@ class GameScreen extends React.Component<GameProps, GameState> {
       return <div>
 	      <canvas className="Canvas" id="game-canvas" >
         </canvas>
+        <label className="Coins">{this.state.coinsText}</label>
+        <label className="Winner">{ this.state.winnerText }</label>
       </div>
     }
 }

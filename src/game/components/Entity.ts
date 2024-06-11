@@ -1,6 +1,6 @@
-import { Container } from 'pixi.js';
+import { Container, Sprite } from 'pixi.js';
 
-class Entity extends Container {
+class Entity extends Sprite {
     public id: number;
     public properties: any;
 

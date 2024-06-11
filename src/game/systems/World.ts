@@ -41,8 +41,10 @@ function onSync(game: Game, data: any) {
         if ('entities' in data) {
             data.entities.forEach((entity: any) => {
                 let localEnt = game.world.findEntityById(entity.id)
-                if (localEnt == null)
-                    game.world.createEntity(entity);
+                if (localEnt == null) {
+                    let ent = game.world.createEntity(entity);
+                    game.world.moveEntity(ent, ent.properties.physics.position.x, ent.properties.physics.position.y)
+                }
             });
         }
     }

@@ -1,22 +1,32 @@
 import { Application, Assets, Container, Sprite, Spritesheet, Texture } from 'pixi.js';
 import { Socket, io } from 'socket.io-client';
 import Logger from '../utils/Logger';
-import Entity from './Entity';
 import EventEmitter from 'events';
 import NetSession from '../utils/NetSession';
 import GameScreen from '../components/game/GameScreen';
-import World from './World';
+import World from './components/World';
 // Systems
-import * as PlayerSystem from './systems/Player'
 import * as WorldSystem from './systems/World'
+import * as PlayerSystem from './systems/Player'
 import * as SpriteSystem from './systems/Sprite'
+
+// Constants
+export const PORT = 11000
+export const ADDRESS = 'localhost'
 
 /* Main game context. Should be created once. */
 class Game {
     // PIXI.js application instance. Contains all render logic
     public pixiApp: Application;
     // Main game world data. Using pixi's container for rendering
-    public world: World;
+  public world: World;
+  
+  public nickname: string;
+
+    // Server address
+    public address: string;
+    // Server port
+    public port: number
 
     // Local client socket for accept/sending net messages
     public session: NetSession | null;
@@ -29,11 +39,16 @@ class Game {
     public emitter: EventEmitter;
 
     private logger: Logger;
-    private gameScreen: GameScreen;
+    public gameScreen: GameScreen;
 
-    constructor(gameScreen: GameScreen) {
+    constructor(gameScreen: GameScreen, address: string, port: number) {
       this.pixiApp = new Application();
       this.world = new World(this);
+
+      this.address = address;
+      this.port = port;
+
+      this.nickname = 'Player';
 
       this.session = null;
 
@@ -51,8 +66,8 @@ class Game {
      */
     public async initPixi() {
       // TODO: Should be accept server's config with connection info
-      const port = 11000;
-      const address = 'localhost';
+      const port = PORT;
+      const address = ADDRESS;
 
       await this.pixiApp.init({
         canvas: document.getElementById('game-canvas') as HTMLCanvasElement,
@@ -90,17 +105,20 @@ class Game {
     /**
      * Initialize networking
      */
-    public initNetwork() {
+    public initNetwork(nickname: string) {
       if (this.session != null)
         return;
 
       // TODO: Should be accept server's config with connection info
-      const port = 11000;
-      const address = 'localhost';
+      const port = PORT;
+      const address = ADDRESS;
       const protocol = 'ws'; // 'http' or 'ws'
 
       // Try connect to server with connection type
       let socket = io(`${protocol}://${address}:${port}`);
+
+      // Set nickname
+      this.nickname = nickname;
 
       // Create local network session
       this.session = new NetSession(socket);
@@ -132,8 +150,8 @@ class Game {
      * Initialize systems and other staff
      */
     public initSystems() {
-      PlayerSystem.create(this);
       WorldSystem.create(this);
+      PlayerSystem.create(this);
       SpriteSystem.create(this);
     }
 
@@ -155,6 +173,10 @@ class Game {
       this.world.onRender = () => {
         this.emitter.emit('onRender', this);
       };
+
+      setInterval(() => {
+        this.emitter.emit('onDelaySprite', this);
+      }, 500)
     }
 
     /**

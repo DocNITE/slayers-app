@@ -1,6 +1,6 @@
-import { Container } from "pixi.js";
+import { Container, Sprite } from "pixi.js";
 
-class Tile extends Container {
+class Tile extends Sprite {
     public id: number;
     public properties: any;
 
